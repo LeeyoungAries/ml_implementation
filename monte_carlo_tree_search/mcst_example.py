@@ -6,9 +6,9 @@ import math
 import random
 import numpy as np
 
-AVAILABLE_CHOICES = [1, -1, 2, -2]
+AVAILABLE_CHOICES = [1, -1, 0, 2, -2]
 AVAILABLE_CHOICE_NUMBER = len(AVAILABLE_CHOICES)
-MAX_ROUND_NUMBER = 10
+MAX_ROUND_NUMBER = 100
 
 
 class State(object):
@@ -19,7 +19,7 @@ class State(object):
   """
 
   def __init__(self):
-    self.current_value = 0.0
+    self.current_value = 0
     # For the first root node, the index is 0 and the game should start from 1
     self.current_round_index = 0
     self.cumulative_choices = []
@@ -170,15 +170,14 @@ def expand(node):
   """
   输入一个节点，在该节点上拓展一个新的节点，使用random方法执行Action，返回新增的节点。注意，需要保证新增的节点与其他节点Action不同。
   """
-
   tried_sub_node_states = [
-      sub_node.get_state() for sub_node in node.get_children()
+      sub_node.get_state().current_value for sub_node in node.get_children()
   ]
 
   new_state = node.get_state().get_next_state_with_random_choice()
 
   # Check until get the new state which has the different action from others
-  while new_state in tried_sub_node_states:
+  while new_state.current_value in tried_sub_node_states:
     new_state = node.get_state().get_next_state_with_random_choice()
 
   sub_node = Node()
@@ -247,7 +246,7 @@ def monte_carlo_tree_search(node):
   进行预测时，只需要根据Q值选择exploitation最大的节点即可，找到下一个最优的节点。
   """
 
-  computation_budget = 2
+  computation_budget = 100
 
   # Run as much as possible under the computation budget
   for i in range(computation_budget):
@@ -275,11 +274,14 @@ def main():
   current_node = init_node
 
   # Set the rounds to play
-  for i in range(10):
+  for i in range(100):
     print("Play round: {}".format(i + 1))
     current_node = monte_carlo_tree_search(current_node)
-    print("Choose node: {}".format(current_node))
-
+    choice = []
+    state = current_node.get_state()
+    choice = state.get_cumulative_choices()
+    print("current value: " , state.current_value)
+  print("hehe ")
 
 if __name__ == "__main__":
   main()
